@@ -1,20 +1,28 @@
 package to.kit.web;
 
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+
+import org.apache.commons.io.FileUtils;
 
 import to.kit.web.w3capturing.Browser;
 
@@ -28,18 +36,43 @@ public final class Capturing extends JFrame {
 	private Format format = new SimpleDateFormat("yyyyMMdd-HHmmss");
 	/** Browser path. */
 	private static final String BROWSER_PATH = "C:/Program Files/Mozilla Firefox/firefox.exe";
+	/** CurrentDirectory for JFileChooser. */
+	private File defaultDir = null;
 
-	protected void saveFile(File srcFile) {
+	private byte[] effect(byte[] bytes, String url) throws IOException {
+		BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+		Graphics2D g = (Graphics2D) image.getGraphics();
+		FontMetrics metrics = g.getFontMetrics();
+		int height = metrics.getHeight() / 2;
+
+		g.setColor(Color.LIGHT_GRAY);
+		for (int y = 0; y < 3; y++) {
+			for (int x = 0; x < 3; x++) {
+				g.drawString(url, x, height + y);
+			}
+		}
+		g.setColor(Color.BLACK);
+		g.drawString(url, 1, height + 1);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ImageIO.write(image, "PNG", out);
+		return out.toByteArray();
+	}
+
+	protected void saveFile(byte[] bytes, String url) {
 		JFileChooser chooser = new JFileChooser();
 		String filename = "capture" + this.format.format(new Date()) + ".png";
 
-		chooser.setCurrentDirectory(null);
+		chooser.setCurrentDirectory(this.defaultDir);
 		chooser.setSelectedFile(new File(filename));
 		if (chooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) {
 			return;
 		}
+		File file = chooser.getSelectedFile();
+		this.defaultDir = chooser.getCurrentDirectory();
 		try {
-			Files.move(srcFile.toPath(), chooser.getSelectedFile().toPath());
+			byte[] effected = effect(bytes, url);
+			FileUtils.writeByteArrayToFile(file, effected);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -59,11 +92,12 @@ public final class Capturing extends JFrame {
 		panel.add(textField);
 		panel.add(button);
 		button.addActionListener(new ActionListener(){
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				String url = textField.getText();
 
 				browser.get(url);
-				saveFile(browser.getScreenshot());
+				saveFile(browser.getScreenshot(), url);
 			}
 		});
 		add(panel);
@@ -78,8 +112,7 @@ public final class Capturing extends JFrame {
 		super.dispose();
 	}
 
-	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-		new Capturing();
+		new Capturing().validate();
 	}
 }

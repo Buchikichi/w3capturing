@@ -48,6 +48,7 @@ public final class Browser {
 		profile.setPreference("browser.sessionhistory.max_total_viewers", 0);
 		profile.setPreference("places.history.enabled", "false");
 		profile.setPreference("browser.privatebrowsing.autostart", true);
+		profile.setPreference("javascript.enabled", false);
 		WebDriver result = new FirefoxDriver(bin, profile);
 		WebDriver.Window window = result.manage().window();
 		Dimension dimension = window.getSize();
@@ -68,9 +69,9 @@ public final class Browser {
 		getDriver().get(url);
 	}
 
-	public File getScreenshot() {
+	public byte[] getScreenshot() {
 		TakesScreenshot takesScreenshot = ((TakesScreenshot) getDriver());
-		return takesScreenshot.getScreenshotAs(OutputType.FILE);
+		return takesScreenshot.getScreenshotAs(OutputType.BYTES);
 	}
 
 	public void destroy() {
@@ -79,8 +80,8 @@ public final class Browser {
 		}
 	}
 
-	public void setBrowserPath(String browserPath) {
-		this.browserPath = browserPath;
+	public void setBrowserPath(String path) {
+		this.browserPath = path;
 	}
 
 	public static Browser getInstance() {
