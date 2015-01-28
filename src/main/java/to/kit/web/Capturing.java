@@ -87,16 +87,26 @@ public final class Capturing extends JFrame {
 		setVisible(true);
 		JPanel panel = new JPanel();
 		final JTextField textField = new JTextField(40);
-		JButton button = new JButton("Capture");
+		JButton button = new JButton("Go and Capture");
+		JButton captureButton = new JButton("Capture");
 
 		panel.add(textField);
 		panel.add(button);
+		panel.add(captureButton);
 		button.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String url = textField.getText();
 
 				browser.get(url);
+				saveFile(browser.getScreenshot(), url);
+			}
+		});
+		captureButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String url = browser.getCurrentUrl();
+
 				saveFile(browser.getScreenshot(), url);
 			}
 		});

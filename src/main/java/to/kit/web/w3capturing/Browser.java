@@ -48,7 +48,8 @@ public final class Browser {
 		profile.setPreference("browser.sessionhistory.max_total_viewers", 0);
 		profile.setPreference("places.history.enabled", "false");
 		profile.setPreference("browser.privatebrowsing.autostart", true);
-		profile.setPreference("javascript.enabled", false);
+		//profile.setPreference("javascript.enabled", false);
+		profile.setPreference("dom.disable_beforeunload", true);
 		WebDriver result = new FirefoxDriver(bin, profile);
 		WebDriver.Window window = result.manage().window();
 		Dimension dimension = window.getSize();
@@ -67,6 +68,10 @@ public final class Browser {
 
 	public void get(String url) {
 		getDriver().get(url);
+	}
+
+	public String getCurrentUrl() {
+		return getDriver().getCurrentUrl();
 	}
 
 	public byte[] getScreenshot() {
